@@ -24,7 +24,7 @@ func check(e error) {
 }
 
 // Instruction memory
-func InitializeInstructionMemory(mem []byte) {
+func InitializeInstructionMemory(mem []byte) int {
 	fileHandle, err := os.Open("./program.asm")
 	defer fileHandle.Close()
 	fileScanner := bufio.NewScanner(fileHandle)
@@ -60,10 +60,11 @@ func InitializeInstructionMemory(mem []byte) {
 		}
 
 	}
+	return i
 }
 
 func instructionToBytes(instruction string) (one byte, two byte, three byte, four byte) {
-	fmt.Println(instruction)
+	//fmt.Println(instruction)
 	ins := strings.Split(instruction, " ")
 
 	switch ins[0] {

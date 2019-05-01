@@ -12,7 +12,7 @@ func main() {
 	instructionsMemory := make([]byte, 512)
 
 	//Initialize memories
-	memory.InitializeInstructionMemory(instructionsMemory)
+	numberOfInstructions := memory.InitializeInstructionMemory(instructionsMemory)
 	memory.InitializeMainMemory(mainMemory)
 
 	//Create clock
@@ -23,8 +23,8 @@ func main() {
 	processor.Init(clock, mainMemory, instructionsMemory)
 
 	go processor.Start()
-	for i := uint64(0); i < 10; i++ {
-		time.Sleep(1 * time.Second)
+	for i := uint64(0); i < uint64(numberOfInstructions)+1; i++ {
+		time.Sleep(100 * time.Millisecond)
 		clock <- i
 	}
 

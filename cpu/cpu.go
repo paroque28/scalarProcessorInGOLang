@@ -46,7 +46,7 @@ func (proc Processor) Start() {
 
 		//JOIN
 		for i := 0; i < 3; i++ {
-			fmt.Println(<-done)
+			<-done
 		}
 		proc.saveState()
 		//fmt.Scanln()
