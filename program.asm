@@ -1,2 +1,9 @@
-LD V1 M[0];
-LD V2 M[0];
+ADD V0 V0 #33
+#repeat 2
+NOP
+ADD V0 V1 V2
+ADDI V3 V4 #100
+ADDI V5 V6 #-100
+ADDI V0 V1 #10000
+#endrepeat
+ADD V31 V31 V31

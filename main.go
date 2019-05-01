@@ -19,10 +19,10 @@ func main() {
 	clock := make(chan uint64)
 
 	//Create CPU
-	processor := cpu.Processor{mainMemory, instructionsMemory, clock}
+	processor := new(cpu.Processor)
+	processor.Init(clock, mainMemory, instructionsMemory)
 
 	go processor.Start()
-
 	for i := uint64(0); i < 10; i++ {
 		time.Sleep(1 * time.Second)
 		clock <- i

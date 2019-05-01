@@ -1,15 +1,21 @@
 package memory
 
 import (
+	"bufio"
 	"fmt"
 	"image"
 	"image/color"
 	"image/png"
 	"io"
-	"io/ioutil"
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
 )
+
+var re = regexp.MustCompile(`.*`)
+
+const MAX_UNSIGNED_IMM = 16384
 
 func check(e error) {
 	if e != nil {
@@ -18,28 +24,110 @@ func check(e error) {
 }
 
 // Instruction memory
-func InitializeInstructionMemory( mem []byte ){
-	dat, err := ioutil.ReadFile("./program.asm")
+func InitializeInstructionMemory(mem []byte) {
+	fileHandle, err := os.Open("./program.asm")
+	defer fileHandle.Close()
+	fileScanner := bufio.NewScanner(fileHandle)
 	check(err)
-	instructions := strings.Split(string(dat), ";")
-	for i := 0; i< len(instructions); i++  {
-		fmt.Println(instructions[i])
-		mem[i*4], mem[i*4+1], mem[i*4+2], mem[i*4+3] = instructioToBytes(instructions[i])
+	i := 0
+	for fileScanner.Scan() {
+		instruction := fileScanner.Text()
+		if !re.MatchString(instruction) {
+			panic("Instruction doesn't match pattern!")
+		}
+		if strings.Contains(instruction, "#repeat") {
+			repeat, err := strconv.Atoi((strings.Split(instruction, " ")[1]))
+			check(err)
+			var instructionsToProcess []string
+			//currentPosition := i
+			for fileScanner.Scan() {
+				instruction := fileScanner.Text()
+				if !strings.Contains(instruction, "#endrepeat") {
+					instructionsToProcess = append(instructionsToProcess, instruction)
+				} else {
+					for j := 0; j < repeat; j++ {
+						for _, ins := range instructionsToProcess {
+							mem[i*4], mem[i*4+1], mem[i*4+2], mem[i*4+3] = instructionToBytes(ins)
+							i++
+						}
+					}
+					break
+				}
+			}
+		} else {
+			mem[i*4], mem[i*4+1], mem[i*4+2], mem[i*4+3] = instructionToBytes(instruction)
+			i++
+		}
+
 	}
 }
 
+func instructionToBytes(instruction string) (one byte, two byte, three byte, four byte) {
+	fmt.Println(instruction)
+	ins := strings.Split(instruction, " ")
 
-func instructioToBytes( instruction string ) ( one byte, two byte, three byte, four byte ){
-	one = 1
-	two = 0
-	three = 1
-	four = 1
+	switch ins[0] {
+	case "NOP":
+		one, two, three, four = 0, 0, 0, 0
+	case "ADD":
+		one = 0x01
+		rd, err := strconv.Atoi(ins[1][1:])
+		if rd > 31 || rd < 0 {
+			panic("RD higher than 32")
+		}
+		check(err)
+		rl, err := strconv.Atoi(ins[2][1:])
+		if rd > 31 || rd < 0 {
+			panic("RL higher than 32")
+		}
+		check(err)
+		rr, err := strconv.Atoi(ins[3][1:])
+		if rd > 31 || rd < 0 {
+			panic("RR higher than 32")
+		}
+		check(err)
+		// byte length  = 8  registers_bits = 5
+		// RD RD RD RD RD RL RL RL
+		two = byte(rd<<(8-5) | (rl >> (5 - (8 - 5))))
+		// RL RL RR RR RR RR RR --
+		three = byte(rl<<(8-2) | rr<<1)
+		//
+		four = 0
+	case "ADDI":
+		one = 0x11
+		rd, err := strconv.Atoi(ins[1][1:])
+		if rd > 31 || rd < 0 {
+			panic("RD higher than 32")
+		}
+		check(err)
+		rl, err := strconv.Atoi(ins[2][1:])
+		if rd > 31 || rd < 0 {
+			panic("RL higher than 32")
+		}
+		check(err)
+		imm, err := strconv.Atoi(ins[3][1:])
+		if rd > MAX_UNSIGNED_IMM/2 || rd < -MAX_UNSIGNED_IMM/2 {
+			panic("Imm higher than MAX")
+		}
+		check(err)
+		// byte length  = 8  registers_bits = 5  IMM = 14
+		// RD RD RD RD RD RL RL RL
+		two = byte(rd<<(8-5) | (rl >> (5 - (8 - 5))))
+		// RL RL IMM IMM IMM IMM IMM IMM
+		three = byte(rl<<(8-2) | ((imm >> 8) & 0x3F))
+		four = byte(imm)
+	default:
+		fmt.Println("Error on: ", instruction)
+		panic("Instruction not supported")
+
+	}
+
 	return
 }
 
 // Main memory Image
 
-func InitializeMainMemory( memory []byte){
+func InitializeMainMemory(memory []byte) {
 	// You can register another format here
 	image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
 
@@ -61,7 +149,7 @@ func InitializeMainMemory( memory []byte){
 }
 
 // Get the bi-dimensional pixel array
-func getPixels(file io.Reader, mem []byte) (error) {
+func getPixels(file io.Reader, mem []byte) error {
 	img, _, err := image.Decode(file)
 
 	if err != nil {
@@ -74,7 +162,7 @@ func getPixels(file io.Reader, mem []byte) (error) {
 	mem[1] = byte(width >> 8)
 	mem[2] = byte(height)
 	mem[3] = byte(height >> 8)
-	fmt.Println("Image Width:",(int(mem[0]) + int(mem[1]) << 8),"Height:", (int(mem[2]) + int(mem[3]) << 8))
+	fmt.Println("Image Width:", (int(mem[0]) + int(mem[1])<<8), "Height:", (int(mem[2]) + int(mem[3])<<8))
 
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
@@ -92,18 +180,17 @@ func rgbaToByte(r uint32, g uint32, b uint32, a uint32) byte {
 	return byte(pixel.Y)
 }
 
-func SaveImage(mem []byte, out string)  {
-	width := (int(mem[0]) + int(mem[1]) << 8)
-	height := (int(mem[2]) + int(mem[3]) << 8)
+func SaveImage(mem []byte, out string) {
+	width := (int(mem[0]) + int(mem[1])<<8)
+	height := (int(mem[2]) + int(mem[3])<<8)
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
-
 
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			index := ((y * width) + x) + 4
-			rgb:= uint8(mem[index])
-			color_in := color.RGBA{rgb,rgb,rgb,255}
-			img.Set(x,y,color_in)
+			rgb := uint8(mem[index])
+			color_in := color.RGBA{rgb, rgb, rgb, 255}
+			img.Set(x, y, color_in)
 		}
 	}
 

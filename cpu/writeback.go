@@ -1,7 +1,7 @@
 package cpu
 
-import "fmt"
+type WriteBack struct {
+}
 
-func writeback() {
-	fmt.Println("Write Back")
+func (wb *WriteBack) Run() {
 }
