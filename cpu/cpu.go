@@ -55,7 +55,7 @@ func (proc Processor) Start() {
 		proc.PC += 4
 		proc.Fetch.UpdateInRegisters(proc.PC)
 		proc.Decode.UpdateInRegisters(proc.Fetch.Instruction)
-		proc.Execute.UpdateInRegisters(proc.Decode.OutControlSignals)
+		proc.Execute.UpdateInRegisters(proc.Decode.OutControlSignals, proc.Decode.Rd1, proc.Decode.Rd2, proc.Decode.Immediate)
 	}
 }
 

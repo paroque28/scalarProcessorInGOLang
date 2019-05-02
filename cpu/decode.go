@@ -63,8 +63,10 @@ func (deco *Decode) UpdateInRegisters(instruction [4]byte) {
 func (deco *Decode) registerOperation(ra1 byte, ra2 byte) {
 	switch deco.Funct {
 	case NOP:
+		deco.setControlSignals(ALU_NOP, true, false, false, false)
 		fmt.Println("NOP")
 	case ADD:
+		deco.setControlSignals(ALU_ADD, true, false, false, true)
 		fmt.Println("ADD", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "V", ra2)
 	default:
 		panic("Not supported Reg instruction")
@@ -74,8 +76,10 @@ func (deco *Decode) registerOperation(ra1 byte, ra2 byte) {
 func (deco *Decode) immediateOperation(ra1 byte) {
 	switch deco.Funct {
 	case NOP:
+		deco.setControlSignals(ALU_NOP, false, false, false, false)
 		fmt.Println("NOPI")
 	case ADD:
+		deco.setControlSignals(ALU_ADD, false, false, false, true)
 		fmt.Println("ADDI", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
 	default:
 		fmt.Println("Funct: ", deco.Funct)
@@ -83,13 +87,12 @@ func (deco *Decode) immediateOperation(ra1 byte) {
 	}
 }
 
-func (deco *Decode) setControlSignals(writeAddress byte,
-	aluControl byte,
+func (deco *Decode) setControlSignals(aluControl byte,
 	aluSrcReg bool,
 	memWriteEnable bool,
 	memToReg bool,
 	registerWriteEnable bool) {
-	deco.OutControlSignals.WriteAddress = writeAddress
+
 	deco.OutControlSignals.ALUControl = aluControl
 	deco.OutControlSignals.ALUSrcReg = aluSrcReg
 	deco.OutControlSignals.MemToReg = memToReg
