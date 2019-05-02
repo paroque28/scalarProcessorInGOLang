@@ -15,7 +15,7 @@ import (
 
 var re = regexp.MustCompile(`.*`)
 
-const MAX_UNSIGNED_IMM = 16384
+const MAX_IMM_BITS = 14
 
 func check(e error) {
 	if e != nil {
@@ -72,18 +72,18 @@ func instructionToBytes(instruction string) (one byte, two byte, three byte, fou
 		one, two, three, four = 0, 0, 0, 0
 	case "ADD":
 		one = 0x01
-		rd, err := strconv.Atoi(ins[1][1:])
-		if rd > 31 || rd < 0 {
-			panic("RD higher than 32")
+		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
+		if rd < 0 {
+			panic("RD is negative")
 		}
 		check(err)
-		rl, err := strconv.Atoi(ins[2][1:])
-		if rd > 31 || rd < 0 {
-			panic("RL higher than 32")
+		rl, err := strconv.ParseUint(ins[2][1:], 10, 5)
+		if rl < 0 {
+			panic("RL is negative")
 		}
 		check(err)
-		rr, err := strconv.Atoi(ins[3][1:])
-		if rd > 31 || rd < 0 {
+		rr, err := strconv.ParseUint(ins[3][1:], 10, 5)
+		if rr > 31 || rr < 0 {
 			panic("RR higher than 32")
 		}
 		check(err)
@@ -96,26 +96,23 @@ func instructionToBytes(instruction string) (one byte, two byte, three byte, fou
 		four = 0
 	case "ADDI":
 		one = 0x11
-		rd, err := strconv.Atoi(ins[1][1:])
+		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
 		if rd > 31 || rd < 0 {
 			panic("RD higher than 32")
 		}
 		check(err)
-		rl, err := strconv.Atoi(ins[2][1:])
-		if rd > 31 || rd < 0 {
+		rl, err := strconv.ParseUint(ins[2][1:], 10, 5)
+		if rl > 31 || rl < 0 {
 			panic("RL higher than 32")
 		}
 		check(err)
-		imm, err := strconv.Atoi(ins[3][1:])
-		if rd > MAX_UNSIGNED_IMM/2 || rd < -MAX_UNSIGNED_IMM/2 {
-			panic("Imm higher than MAX")
-		}
+		imm, err := strconv.ParseInt(ins[3][1:], 10, MAX_IMM_BITS)
 		check(err)
 		// byte length  = 8  registers_bits = 5  IMM = 14
 		// RD RD RD RD RD RL RL RL
 		two = byte(rd<<(8-5) | (rl >> (5 - (8 - 5))))
 		// RL RL IMM IMM IMM IMM IMM IMM
-		three = byte(rl<<(8-2) | ((imm >> 8) & 0x3F))
+		three = byte(rl<<(8-2) | uint64((imm>>8)&0x3F))
 		four = byte(imm)
 	default:
 		fmt.Println("Error on: ", instruction)
