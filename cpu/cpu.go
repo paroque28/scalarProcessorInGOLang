@@ -41,21 +41,22 @@ func (proc Processor) Start() {
 		go proc.Fetch.Run(done, proc.InstructionsMemory)
 		go proc.Decode.Run(done, proc.Registers)
 		go proc.Execute.Run(done)
-		go proc.Memory.Run()
-		go proc.Writeback.Run()
+		go proc.Memory.Run(done)
+		go proc.Writeback.Run(done, proc.Registers)
 
 		//JOIN
-		for i := 0; i < 3; i++ {
+		for i := 0; i < 5; i++ {
 			<-done
 		}
 		proc.saveState()
-		//fmt.Scanln()
 
 		//Update Input Registers
 		proc.PC += 4
 		proc.Fetch.UpdateInRegisters(proc.PC)
 		proc.Decode.UpdateInRegisters(proc.Fetch.Instruction)
 		proc.Execute.UpdateInRegisters(proc.Decode.OutControlSignals, proc.Decode.Rd1, proc.Decode.Rd2, proc.Decode.Immediate)
+		proc.Memory.UpdateInRegisters(proc.Execute.OutControlSignals, proc.Execute.ALUResult)
+		proc.Writeback.UpdateInRegisters(proc.Memory.OutControlSignals, proc.Memory.ALUResult)
 	}
 }
 

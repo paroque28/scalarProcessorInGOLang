@@ -25,6 +25,7 @@ func main() {
 	go processor.Start()
 	for i := uint64(0); i < uint64(numberOfInstructions)+1; i++ {
 		time.Sleep(100 * time.Millisecond)
+		//fmt.Scanln()
 		clock <- i
 	}
 
