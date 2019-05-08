@@ -33,7 +33,7 @@ func InitializeInstructionMemory(mem []byte) int {
 	for fileScanner.Scan() {
 		instruction := fileScanner.Text()
 		if !re.MatchString(instruction) {
-			panic("Instruction doesn't match pattern!")
+			panic("[Assembler] Instruction doesn't match pattern!")
 		}
 		if strings.Contains(instruction, "#repeat") {
 			repeat, err := strconv.Atoi((strings.Split(instruction, " ")[1]))
@@ -71,21 +71,15 @@ func instructionToBytes(instruction string) (one byte, two byte, three byte, fou
 	case "NOP":
 		one, two, three, four = 0, 0, 0, 0
 	case "ADD":
+		if ins[3][:1] != "V" {
+			panic("[Assembler] Add is immediate")
+		}
 		one = 0x01
 		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
-		if rd < 0 {
-			panic("RD is negative")
-		}
 		check(err)
 		rl, err := strconv.ParseUint(ins[2][1:], 10, 5)
-		if rl < 0 {
-			panic("RL is negative")
-		}
 		check(err)
 		rr, err := strconv.ParseUint(ins[3][1:], 10, 5)
-		if rr > 31 || rr < 0 {
-			panic("RR higher than 32")
-		}
 		check(err)
 		// byte length  = 8  registers_bits = 5
 		// RD RD RD RD RD RL RL RL
@@ -95,16 +89,13 @@ func instructionToBytes(instruction string) (one byte, two byte, three byte, fou
 		//
 		four = 0
 	case "ADDI":
+		if ins[3][:1] != "#" {
+			panic("[Assembler] Add not immediate")
+		}
 		one = 0x11
 		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
-		if rd > 31 || rd < 0 {
-			panic("RD higher than 32")
-		}
 		check(err)
 		rl, err := strconv.ParseUint(ins[2][1:], 10, 5)
-		if rl > 31 || rl < 0 {
-			panic("RL higher than 32")
-		}
 		check(err)
 		imm, err := strconv.ParseInt(ins[3][1:], 10, MAX_IMM_BITS)
 		check(err)
@@ -114,9 +105,46 @@ func instructionToBytes(instruction string) (one byte, two byte, three byte, fou
 		// RL RL IMM IMM IMM IMM IMM IMM
 		three = byte(rl<<(8-2) | uint64((imm>>8)&0x3F))
 		four = byte(imm)
+	case "LOAD":
+		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
+		check(err)
+		if ins[2][:1] == "#" {
+			one = 0x31
+			imm, err := strconv.ParseInt(ins[3][1:], 10, 15)
+			check(err)
+			two = byte(rd<<(8-5) | uint64(imm))
+		} else if ins[2][:1] == "V" {
+			one = 0x41
+			rl, err := strconv.ParseUint(ins[2][1:], 10, 5)
+			check(err)
+			two = byte(rd<<(8-5) | (rl >> (5 - (8 - 5))))
+			// RL RL RR RR RR RR RR --
+			three = byte(rl << (8 - 2))
+		} else {
+			panic("[Assembler] Unknown source on load")
+		}
+	case "STORE":
+		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
+		check(err)
+		if ins[2][:1] == "#" {
+			one = 0x32
+			imm, err := strconv.ParseInt(ins[3][1:], 10, 15)
+			check(err)
+			two = byte(rd<<(8-5) | uint64(imm))
+		} else if ins[2][:1] == "V" {
+			one = 0x42
+			rl, err := strconv.ParseUint(ins[2][1:], 10, 5)
+			check(err)
+			two = byte(rd<<(8-5) | (rl >> (5 - (8 - 5))))
+			// RL RL RR RR RR RR RR --
+			three = byte(rl << (8 - 2))
+		} else {
+			panic("[Assembler] Unknown source on store")
+		}
+
 	default:
 		fmt.Println("Error on: ", instruction)
-		panic("Instruction not supported")
+		panic("[Assembler] Instruction not supported")
 
 	}
 

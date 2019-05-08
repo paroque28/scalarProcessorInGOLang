@@ -1,10 +1,7 @@
 package cpu
 
 import (
-	"bufio"
-	"encoding/json"
 	"fmt"
-	"os"
 )
 
 type Processor struct {
@@ -38,17 +35,17 @@ func (proc Processor) Start() {
 	for {
 		done := make(chan string)
 		proc.Clock = <-proc.InClock
+		println(proc.Clock)
 		go proc.Fetch.Run(done, proc.InstructionsMemory)
 		go proc.Decode.Run(done, proc.Registers)
 		go proc.Execute.Run(done)
-		go proc.Memory.Run(done)
+		go proc.Memory.Run(done, proc.MainMemory)
 		go proc.Writeback.Run(done, proc.Registers)
 
 		//JOIN
 		for i := 0; i < 5; i++ {
 			<-done
 		}
-		proc.saveState()
 
 		//Update Input Registers
 		proc.PC += 4
@@ -57,26 +54,5 @@ func (proc Processor) Start() {
 		proc.Execute.UpdateInRegisters(proc.Decode.OutControlSignals, proc.Decode.Rd1, proc.Decode.Rd2, proc.Decode.Immediate)
 		proc.Memory.UpdateInRegisters(proc.Execute.OutControlSignals, proc.Execute.ALUResult)
 		proc.Writeback.UpdateInRegisters(proc.Memory.OutControlSignals, proc.Memory.ALUResult)
-	}
-}
-
-func (proc *Processor) saveState() {
-	instant, err := json.Marshal(proc)
-	catch(err)
-	//f, err := os.OpenFile("now.json", os.O_APPEND|os.O_WRONLY, 0600)
-	f, err := os.Create("now.json")
-	catch(err)
-	w := bufio.NewWriter(f)
-	_, err = w.WriteString(string(instant) + "\n")
-	catch(err)
-	err = w.Flush()
-	catch(err)
-	//fmt.Println("JSON Saved!")
-}
-
-func catch(err error) {
-	if err != nil {
-		fmt.Println(err)
-		return
 	}
 }
