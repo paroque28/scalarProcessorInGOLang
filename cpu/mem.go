@@ -1,7 +1,5 @@
 package cpu
 
-import "fmt"
-
 type Memory struct {
 	InExecuteControlSignals ExecuteControlSignals `json:"in_execute_control_signals"`
 	OutControlSignals       MemControlSignals     `json:"control_signals"`
@@ -23,10 +21,10 @@ func (mem *Memory) Run(done chan string, mainMemory []byte) {
 		//fmt.Println("[Mem] Mem Position to Read:", mem.InALUResult)
 		mem.ALUResult = 0
 		for i := uint64(0); i < BITS64_BYTES; i++ {
-			fmt.Printf("[Mem] LOAD:  M[%x]=%x\n", mem.InALUResult+i, mainMemory[mem.InALUResult+i])
+			//fmt.Printf("[Mem] LOAD:  M[%x]=%x\n", mem.InALUResult+i, mainMemory[mem.InALUResult+i])
 			mem.ALUResult |= uint64(mainMemory[mem.InALUResult+i]) << (8 * i)
 		}
-		fmt.Printf("[Mem] LOAD:  V[%x]=%x\n", mem.InExecuteControlSignals.WriteAddress, mem.ALUResult)
+		//fmt.Printf("[Mem] LOAD:  V[%x]=%x\n", mem.InExecuteControlSignals.WriteAddress, mem.ALUResult)
 	} else {
 		mem.ALUResult = mem.InALUResult
 	}
@@ -35,8 +33,8 @@ func (mem *Memory) Run(done chan string, mainMemory []byte) {
 		for i := uint64(0); i < BITS64_BYTES; i++ {
 			dataIn := byte(mem.InALUResult >> (8 * i))
 			baseAddress := mem.InExecuteControlSignals.MemWriteAddress
-			fmt.Printf("[Mem] STORE: original byte[%x]: % x\n", baseAddress+i, mainMemory[baseAddress+i])
-			fmt.Printf("[Mem] STORE: new      byte[%x]: % x\n", baseAddress+i, dataIn)
+			//fmt.Printf("[Mem] STORE: original byte[%x]: % x\n", baseAddress+i, mainMemory[baseAddress+i])
+			//fmt.Printf("[Mem] STORE: new      byte[%x]: % x\n", baseAddress+i, dataIn)
 			mainMemory[baseAddress+i] = dataIn
 		}
 	}

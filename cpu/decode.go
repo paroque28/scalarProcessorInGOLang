@@ -37,6 +37,8 @@ const MEM_REG byte = 0x4
 //funct AL
 const NOP byte = 0x0
 const ADD byte = 0x1
+const ADD255 byte = 0x2
+const XOR255 byte = 0x3
 
 //funct mem
 const LOAD_64 byte = 0x1
@@ -95,6 +97,12 @@ func (deco *Decode) immediateOperation(ra1 byte) {
 	case ADD:
 		deco.setControlSignals(ALU_ADD, false, false, false, true)
 		fmt.Println("[Deco] ADDI", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+	case ADD255:
+		deco.setControlSignals(ALU_ADD255, false, false, false, true)
+		fmt.Println("[Deco] ADD255", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+	case XOR255:
+		deco.setControlSignals(ALU_XOR255, false, false, false, true)
+		fmt.Println("[Deco] XOR255", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
 	default:
 		fmt.Println("Funct: ", deco.Funct)
 		panic("[Deco] Not supported Imm instruction")

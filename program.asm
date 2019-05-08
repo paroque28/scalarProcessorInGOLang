@@ -1,22 +1,16 @@
-ADDI V2 V2 #16
-NOP
-NOP
-NOP
-#repeat 40
+// Add Skip size of image
+ADDI V2 V2 #4
+
+#repeat 100
 LOAD V5 V2
-NOP
-NOP
-NOP
-ADDI V5 V5 #400
-NOP
-NOP
-NOP
+// Editar la imagen
+// ADDI V5 V0 #100
+// ADD Encriptation
+// ADD255 V5 V5 #50
+// ADD255 V5 V5 #-50
+// XOR Encriptation
+// XOR255 V5 V5 #65
+// XOR255 V5 V5 #65
 STORE V2 V5
-NOP
-NOP
-NOP
 ADDI V2 V2 #8
-NOP
-NOP
-NOP
 #endrepeat

@@ -35,7 +35,7 @@ func (proc Processor) Start() {
 	for {
 		done := make(chan string)
 		proc.Clock = <-proc.InClock
-		println(proc.Clock)
+		//println(proc.Clock)
 		go proc.Fetch.Run(done, proc.InstructionsMemory)
 		go proc.Decode.Run(done, proc.Registers)
 		go proc.Execute.Run(done)

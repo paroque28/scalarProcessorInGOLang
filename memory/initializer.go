@@ -22,6 +22,14 @@ func check(e error) {
 		panic(e)
 	}
 }
+func addInstruction(mem []byte, ins string, i *int) {
+	mem[(*i)*4], mem[(*i)*4+1], mem[(*i)*4+2], mem[(*i)*4+3] = instructionToBytes(ins)
+	*i++
+	for j := 0; j < 3; j++ {
+		mem[(*i)*4], mem[(*i)*4+1], mem[(*i)*4+2], mem[(*i)*4+3] = instructionToBytes("NOP \n")
+		*i++
+	}
+}
 
 // Instruction memory
 func InitializeInstructionMemory(mem []byte) int {
@@ -47,16 +55,14 @@ func InitializeInstructionMemory(mem []byte) int {
 				} else {
 					for j := 0; j < repeat; j++ {
 						for _, ins := range instructionsToProcess {
-							mem[i*4], mem[i*4+1], mem[i*4+2], mem[i*4+3] = instructionToBytes(ins)
-							i++
+							addInstruction(mem, ins, &i)
 						}
 					}
 					break
 				}
 			}
 		} else {
-			mem[i*4], mem[i*4+1], mem[i*4+2], mem[i*4+3] = instructionToBytes(instruction)
-			i++
+			addInstruction(mem, instruction, &i)
 		}
 
 	}
@@ -105,6 +111,40 @@ func instructionToBytes(instruction string) (one byte, two byte, three byte, fou
 		// RL RL IMM IMM IMM IMM IMM IMM
 		three = byte(rl<<(8-2) | uint64((imm>>8)&0x3F))
 		four = byte(imm)
+	case "ADD255":
+		if ins[3][:1] != "#" {
+			panic("[Assembler] Add not immediate")
+		}
+		one = 0x12
+		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
+		check(err)
+		rl, err := strconv.ParseUint(ins[2][1:], 10, 5)
+		check(err)
+		imm, err := strconv.ParseInt(ins[3][1:], 10, MAX_IMM_BITS)
+		check(err)
+		// byte length  = 8  registers_bits = 5  IMM = 14
+		// RD RD RD RD RD RL RL RL
+		two = byte(rd<<(8-5) | (rl >> (5 - (8 - 5))))
+		// RL RL IMM IMM IMM IMM IMM IMM
+		three = byte(rl<<(8-2) | uint64((imm>>8)&0x3F))
+		four = byte(imm)
+	case "XOR255":
+		if ins[3][:1] != "#" {
+			panic("[Assembler] Add not immediate")
+		}
+		one = 0x13
+		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
+		check(err)
+		rl, err := strconv.ParseUint(ins[2][1:], 10, 5)
+		check(err)
+		imm, err := strconv.ParseInt(ins[3][1:], 10, MAX_IMM_BITS)
+		check(err)
+		// byte length  = 8  registers_bits = 5  IMM = 14
+		// RD RD RD RD RD RL RL RL
+		two = byte(rd<<(8-5) | (rl >> (5 - (8 - 5))))
+		// RL RL IMM IMM IMM IMM IMM IMM
+		three = byte(rl<<(8-2) | uint64((imm>>8)&0x3F))
+		four = byte(imm)
 	case "LOAD":
 		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
 		check(err)
@@ -141,6 +181,8 @@ func instructionToBytes(instruction string) (one byte, two byte, three byte, fou
 		} else {
 			panic("[Assembler] Unknown source on store")
 		}
+	case "//":
+	case "":
 
 	default:
 		fmt.Println("Error on: ", instruction)

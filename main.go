@@ -7,7 +7,6 @@ import (
 	"os"
 	"scalarProcessor/cpu"
 	"scalarProcessor/memory"
-	"time"
 )
 
 const saveFile = "cpu.json"
@@ -62,7 +61,7 @@ func main() {
 	initJSON()
 	//Create memories
 	mainMemory := make([]byte, 131032)
-	instructionsMemory := make([]byte, 10000)
+	instructionsMemory := make([]byte, 1000000)
 
 	//Initialize memories
 	numberOfInstructions := memory.InitializeInstructionMemory(instructionsMemory)
@@ -81,7 +80,7 @@ func main() {
 	for i := uint64(0); i < uint64(numberOfInstructions)+5; i++ {
 		//fmt.Scanln()
 		clock <- i
-		time.Sleep(1 * time.Millisecond)
+		//time.Sleep(1 * time.Millisecond)
 		saveState(processor)
 	}
 	endJSON()
