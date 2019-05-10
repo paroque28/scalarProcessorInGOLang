@@ -39,6 +39,15 @@ const NOP byte = 0x0
 const ADD byte = 0x1
 const ADD255 byte = 0x2
 const XOR255 byte = 0x3
+const AND byte = 0x4
+const OR byte = 0x5
+const SHUFFLE byte = 0x6
+const UNSHUFFLE byte = 0x7
+const SHUFFLE255 byte = 0x8
+const UNSHUFFLE255 byte = 0x9
+const RL byte = 0xA
+const RR byte = 0xB
+const FLIP byte = 0xC
 
 //funct mem
 const LOAD_64 byte = 0x1
@@ -103,6 +112,34 @@ func (deco *Decode) immediateOperation(ra1 byte) {
 	case XOR255:
 		deco.setControlSignals(ALU_XOR255, false, false, false, true)
 		fmt.Println("[Deco] XOR255", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+	case AND:
+		deco.setControlSignals(ALU_AND, false, false, false, true)
+		fmt.Println("[Deco] AND", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+	case OR:
+		deco.setControlSignals(ALU_OR, false, false, false, true)
+		fmt.Println("[Deco] OR", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+	case SHUFFLE:
+		deco.setControlSignals(ALU_SHUFFLE, false, false, false, true)
+		fmt.Println("[Deco] SHUFFLE", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+	case UNSHUFFLE:
+		deco.setControlSignals(ALU_UNSHUFFLE, false, false, false, true)
+		fmt.Println("[Deco] UNSHUFFLE", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+	case SHUFFLE255:
+		deco.setControlSignals(ALU_SHUFFLE255, false, false, false, true)
+		fmt.Println("[Deco] SHUFFLE255", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+	case UNSHUFFLE255:
+		deco.setControlSignals(ALU_UNSHUFFLE255, false, false, false, true)
+		fmt.Println("[Deco] UNSHUFFLE255", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+	case FLIP:
+		deco.setControlSignals(ALU_FLIP, false, false, false, true)
+		fmt.Println("[Deco] FLIP", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+	case RL:
+		deco.setControlSignals(ALU_ROTATE_LEFT, false, false, false, true)
+		fmt.Println("[Deco] RL", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+	case RR:
+		deco.setControlSignals(ALU_ROTATE_RIGHT, false, false, false, true)
+		fmt.Println("[Deco] RR", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+
 	default:
 		fmt.Println("Funct: ", deco.Funct)
 		panic("[Deco] Not supported Imm instruction")

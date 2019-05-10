@@ -145,6 +145,114 @@ func instructionToBytes(instruction string) (one byte, two byte, three byte, fou
 		// RL RL IMM IMM IMM IMM IMM IMM
 		three = byte(rl<<(8-2) | uint64((imm>>8)&0x3F))
 		four = byte(imm)
+	case "ANDI":
+		if ins[3][:1] != "#" {
+			panic("[Assembler] Add not immediate")
+		}
+		one = 0x14
+		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
+		check(err)
+		rl, err := strconv.ParseUint(ins[2][1:], 10, 5)
+		check(err)
+		imm, err := strconv.ParseInt(ins[3][1:], 10, MAX_IMM_BITS)
+		check(err)
+		// byte length  = 8  registers_bits = 5  IMM = 14
+		// RD RD RD RD RD RL RL RL
+		two = byte(rd<<(8-5) | (rl >> (5 - (8 - 5))))
+		// RL RL IMM IMM IMM IMM IMM IMM
+		three = byte(rl<<(8-2) | uint64((imm>>8)&0x3F))
+		four = byte(imm)
+	case "ORI":
+		if ins[3][:1] != "#" {
+			panic("[Assembler] Add not immediate")
+		}
+		one = 0x15
+		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
+		check(err)
+		rl, err := strconv.ParseUint(ins[2][1:], 10, 5)
+		check(err)
+		imm, err := strconv.ParseInt(ins[3][1:], 10, MAX_IMM_BITS)
+		check(err)
+		// byte length  = 8  registers_bits = 5  IMM = 14
+		// RD RD RD RD RD RL RL RL
+		two = byte(rd<<(8-5) | (rl >> (5 - (8 - 5))))
+		// RL RL IMM IMM IMM IMM IMM IMM
+		three = byte(rl<<(8-2) | uint64((imm>>8)&0x3F))
+		four = byte(imm)
+	case "SHUFFLE":
+		one = 0x16
+		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
+		check(err)
+		rl, err := strconv.ParseUint(ins[2][1:], 10, 5)
+		check(err)
+		two = byte(rd<<(8-5) | (rl >> (5 - (8 - 5))))
+		three = byte(rl << (8 - 2))
+	case "UNSHUFFLE":
+		one = 0x17
+		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
+		check(err)
+		rl, err := strconv.ParseUint(ins[2][1:], 10, 5)
+		check(err)
+		two = byte(rd<<(8-5) | (rl >> (5 - (8 - 5))))
+		three = byte(rl << (8 - 2))
+	case "SHUFFLE255":
+		one = 0x18
+		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
+		check(err)
+		rl, err := strconv.ParseUint(ins[2][1:], 10, 5)
+		check(err)
+		two = byte(rd<<(8-5) | (rl >> (5 - (8 - 5))))
+		three = byte(rl << (8 - 2))
+	case "UNSHUFFLE255":
+		one = 0x19
+		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
+		check(err)
+		rl, err := strconv.ParseUint(ins[2][1:], 10, 5)
+		check(err)
+		two = byte(rd<<(8-5) | (rl >> (5 - (8 - 5))))
+		three = byte(rl << (8 - 2))
+	case "RL":
+		if ins[3][:1] != "#" {
+			panic("[Assembler] Add not immediate")
+		}
+		one = 0x1A
+		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
+		check(err)
+		rl, err := strconv.ParseUint(ins[2][1:], 10, 5)
+		check(err)
+		imm, err := strconv.ParseInt(ins[3][1:], 10, MAX_IMM_BITS)
+		check(err)
+		// byte length  = 8  registers_bits = 5  IMM = 14
+		// RD RD RD RD RD RL RL RL
+		two = byte(rd<<(8-5) | (rl >> (5 - (8 - 5))))
+		// RL RL IMM IMM IMM IMM IMM IMM
+		three = byte(rl<<(8-2) | uint64((imm>>8)&0x3F))
+		four = byte(imm)
+	case "RR":
+		if ins[3][:1] != "#" {
+			panic("[Assembler] Add not immediate")
+		}
+		one = 0x1B
+		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
+		check(err)
+		rl, err := strconv.ParseUint(ins[2][1:], 10, 5)
+		check(err)
+		imm, err := strconv.ParseInt(ins[3][1:], 10, MAX_IMM_BITS)
+		check(err)
+		// byte length  = 8  registers_bits = 5  IMM = 14
+		// RD RD RD RD RD RL RL RL
+		two = byte(rd<<(8-5) | (rl >> (5 - (8 - 5))))
+		// RL RL IMM IMM IMM IMM IMM IMM
+		three = byte(rl<<(8-2) | uint64((imm>>8)&0x3F))
+		four = byte(imm)
+	case "FLIP":
+		one = 0x1C
+		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
+		check(err)
+		rl, err := strconv.ParseUint(ins[2][1:], 10, 5)
+		check(err)
+		two = byte(rd<<(8-5) | (rl >> (5 - (8 - 5))))
+		three = byte(rl << (8 - 2))
 	case "LOAD":
 		rd, err := strconv.ParseUint(ins[1][1:], 10, 5)
 		check(err)
