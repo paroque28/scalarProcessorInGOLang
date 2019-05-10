@@ -17,15 +17,6 @@ type ExecuteControlSignals struct {
 	RegisterWriteEnable bool   `json:"register_write_enable"`
 }
 
-const (
-	ALU_NOP       = iota
-	ALU_BUFFER    = iota
-	ALU_ADD       = iota
-	ALU_ADD255    = iota
-	ALU_XOR255    = iota
-	ALU_TOTAL_OPS = iota
-)
-
 func (exec *Execute) Run(done chan string) {
 	if exec.InDecodeControlSignals.ALUSrcReg {
 		exec.ALUResult = ALU(exec.InDecodeControlSignals.ALUControl, exec.InRd1, exec.InRd2)
@@ -41,36 +32,7 @@ func (exec *Execute) Run(done chan string) {
 		exec.InDecodeControlSignals.WriteAddress)
 	done <- "execute"
 }
-func ALU(aluOp byte, a uint64, b uint64) (result uint64) {
-	switch aluOp {
-	case ALU_BUFFER:
-		result = a
-	case ALU_NOP:
-		result = 0
-	case ALU_ADD:
-		result = uint64(int(a) + int(b))
-	case ALU_ADD255:
-		result = 0
-		for i := uint(0); i < BITS64_BYTES; i++ {
-			miniA := int8(a >> (8 * i))
-			sum := uint8(miniA + int8(b))
-			result |= uint64(sum) << (8 * i)
-			//fmt.Printf("[Exec] ADD255:  a:%x miniA:%x b:%x sum:%x result:%x\n",a,miniA,b,sum,result)
-		}
-	//fmt.Printf("[Exec] ADD255:  a:%x b:%x  result:%x\n",a,b,result)
-	case ALU_XOR255:
-		result = 0
-		for i := uint(0); i < BITS64_BYTES; i++ {
-			miniA := uint8(a >> (8 * i))
-			xor := uint8(miniA ^ uint8(b))
-			result |= uint64(xor) << (8 * i)
-			//fmt.Printf("[Exec] XOR255:  a:%x miniA:%x b:%x sum:%x result:%x\n",a,miniA,b,xor,result)
-		}
-	default:
-		panic("[Exec] ALU operation not implemented")
-	}
-	return
-}
+
 func (exec *Execute) UpdateInRegisters(inControlSignals DecodeControlSignals, rd1 uint64, rd2 uint64, immediate int64) {
 	exec.InDecodeControlSignals = inControlSignals
 	exec.InRd1 = rd1
