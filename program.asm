@@ -1,7 +1,7 @@
 // Add Skip size of image
 ADDI V2 V2 #4
 
-#repeat 50
+#repeat 8000
 LOAD V5 V2
 // Editar la imagen
 // ADDI V5 V0 #100
@@ -15,11 +15,11 @@ LOAD V5 V2
 // UNSHUFFLE V5 V5
 // SHUFFLE255 V5 V5
 // UNSHUFFLE255 V5 V5
-// FLIP V5 V5
+FLIP V5 V5
 // FLIP V5 V5
 // UNSHUFFLE255 V5 V5
-// RL V5 V5 #5
-// RR V5 V5 #5
+// RL V5 V5 #32
+// RR V5 V5 #32
 STORE V2 V5
 ADDI V2 V2 #8
 #endrepeat

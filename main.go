@@ -61,7 +61,7 @@ func main() {
 	initJSON()
 	//Create memories
 	mainMemory := make([]byte, 131032)
-	instructionsMemory := make([]byte, 1000000)
+	instructionsMemory := make([]byte, 100000000)
 
 	//Initialize memories
 	numberOfInstructions := memory.InitializeInstructionMemory(instructionsMemory)
@@ -81,7 +81,11 @@ func main() {
 		//fmt.Scanln()
 		clock <- i
 		//time.Sleep(1 * time.Millisecond)
-		saveState(processor)
+		if i%2000 == 0 {
+			saveState(processor)
+			memory.SaveImage(mainMemory, "result.png")
+		}
+
 	}
 	endJSON()
 	//Save image
