@@ -1,7 +1,5 @@
 package cpu
 
-import "fmt"
-
 const (
 	ALU_NOP          = iota
 	ALU_BUFFER       = iota
@@ -170,6 +168,6 @@ func flip(a uint64, b uint64) (result uint64) {
 	for i := uint(0); i < 64; i++ {
 		result |= ((a >> (63 - i)) & 0x1) << i
 	}
-	fmt.Printf("[ALU] FLIP:  a:%x result:%x\n", a, result)
+	//fmt.Printf("[ALU] FLIP:  a:%x result:%x\n", a, result)
 	return result
 }
