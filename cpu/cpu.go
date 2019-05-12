@@ -4,6 +4,8 @@ import (
 	"fmt"
 )
 
+const DEBUG = 1
+
 type Processor struct {
 	MainMemory         []byte      `json:"-"`
 	InstructionsMemory []byte      `json:"-"`
@@ -31,7 +33,9 @@ func (proc *Processor) Init(clock chan uint64, mainMemory []byte, instructionsMe
 }
 
 func (proc Processor) Start() {
-	fmt.Println("Starting Processor...")
+	if DEBUG > 0 {
+		fmt.Println("Starting Processor...")
+	}
 	for {
 		done := make(chan string)
 		proc.Clock = <-proc.InClock

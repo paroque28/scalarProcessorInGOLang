@@ -92,7 +92,9 @@ func (deco *Decode) registerOperation(ra1 byte, ra2 byte) {
 		//fmt.Println("[Deco] NOP")
 	case ADD:
 		deco.setControlSignals(ALU_ADD, true, false, false, true)
-		fmt.Println("[Deco] ADD", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "V", ra2)
+		if DEBUG > 2 {
+			fmt.Println("[Deco] ADD", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "V", ra2)
+		}
 	default:
 		panic("[Deco] Not supported Reg instruction")
 	}
@@ -102,43 +104,67 @@ func (deco *Decode) immediateOperation(ra1 byte) {
 	switch deco.Funct {
 	case NOP:
 		deco.setControlSignals(ALU_NOP, false, false, false, false)
-		fmt.Println("[Deco] NOPI")
+		if DEBUG > 2 {
+			fmt.Println("[Deco] NOPI")
+		}
 	case ADD:
 		deco.setControlSignals(ALU_ADD, false, false, false, true)
-		fmt.Println("[Deco] ADDI", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		if DEBUG > 2 {
+			fmt.Println("[Deco] ADDI", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		}
 	case ADD255:
 		deco.setControlSignals(ALU_ADD255, false, false, false, true)
-		fmt.Println("[Deco] ADD255", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		if DEBUG > 2 {
+			fmt.Println("[Deco] ADD255", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		}
 	case XOR255:
 		deco.setControlSignals(ALU_XOR255, false, false, false, true)
-		fmt.Println("[Deco] XOR255", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		if DEBUG > 2 {
+			fmt.Println("[Deco] XOR255", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		}
 	case AND:
 		deco.setControlSignals(ALU_AND, false, false, false, true)
-		fmt.Println("[Deco] AND", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		if DEBUG > 2 {
+			fmt.Println("[Deco] AND", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		}
 	case OR:
 		deco.setControlSignals(ALU_OR, false, false, false, true)
 		fmt.Println("[Deco] OR", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
 	case SHUFFLE:
 		deco.setControlSignals(ALU_SHUFFLE, false, false, false, true)
-		fmt.Println("[Deco] SHUFFLE", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		if DEBUG > 2 {
+			fmt.Println("[Deco] SHUFFLE", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		}
 	case UNSHUFFLE:
 		deco.setControlSignals(ALU_UNSHUFFLE, false, false, false, true)
-		fmt.Println("[Deco] UNSHUFFLE", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		if DEBUG > 2 {
+			fmt.Println("[Deco] UNSHUFFLE", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		}
 	case SHUFFLE255:
 		deco.setControlSignals(ALU_SHUFFLE255, false, false, false, true)
-		fmt.Println("[Deco] SHUFFLE255", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		if DEBUG > 2 {
+			fmt.Println("[Deco] SHUFFLE255", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		}
 	case UNSHUFFLE255:
 		deco.setControlSignals(ALU_UNSHUFFLE255, false, false, false, true)
-		fmt.Println("[Deco] UNSHUFFLE255", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		if DEBUG > 2 {
+			fmt.Println("[Deco] UNSHUFFLE255", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		}
 	case FLIP:
 		deco.setControlSignals(ALU_FLIP, false, false, false, true)
-		fmt.Println("[Deco] FLIP", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		if DEBUG > 2 {
+			fmt.Println("[Deco] FLIP", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		}
 	case RL:
 		deco.setControlSignals(ALU_ROTATE_LEFT, false, false, false, true)
-		fmt.Println("[Deco] RL", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		if DEBUG > 2 {
+			fmt.Println("[Deco] RL", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		}
 	case RR:
 		deco.setControlSignals(ALU_ROTATE_RIGHT, false, false, false, true)
-		fmt.Println("[Deco] RR", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		if DEBUG > 2 {
+			fmt.Println("[Deco] RR", "V", deco.OutControlSignals.WriteAddress, "V", ra1, "#", deco.Immediate)
+		}
 
 	default:
 		fmt.Println("Funct: ", deco.Funct)
@@ -150,11 +176,15 @@ func (deco *Decode) memRegOperation(ra1 byte, registers []uint64) {
 	switch deco.Funct {
 	case LOAD_64:
 		deco.setControlSignals(ALU_BUFFER, true, false, true, true)
-		fmt.Printf("[Deco] LOAD V%d, V%d : V[%x]=M[%x]\n", deco.OutControlSignals.WriteAddress, ra1, deco.OutControlSignals.WriteAddress, deco.Rd1)
+		if DEBUG > 2 {
+			fmt.Printf("[Deco] LOAD V%d, V%d : V[%x]=M[%x]\n", deco.OutControlSignals.WriteAddress, ra1, deco.OutControlSignals.WriteAddress, deco.Rd1)
+		}
 	case STORE_64:
 		deco.setControlSignals(ALU_BUFFER, true, true, false, false)
 		deco.OutControlSignals.MemWriteAddress = uint64(registers[deco.OutControlSignals.WriteAddress])
-		fmt.Printf("[Deco] STORE V%d  V%d : M[%x] = %x \n", deco.OutControlSignals.WriteAddress, deco.Ra1, deco.OutControlSignals.MemWriteAddress, deco.Rd1)
+		if DEBUG > 2 {
+			fmt.Printf("[Deco] STORE V%d  V%d : M[%x] = %x \n", deco.OutControlSignals.WriteAddress, deco.Ra1, deco.OutControlSignals.MemWriteAddress, deco.Rd1)
+		}
 
 	default:
 		fmt.Println("Funct: ", deco.Funct)

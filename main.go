@@ -10,7 +10,9 @@ import (
 )
 
 const saveFile = "cpu.json"
+const OUTFILE = "out/result.png"
 const allSnapshots = false
+const STEP = 30000
 
 func initJSON() {
 	f, err := os.Create(saveFile)
@@ -77,18 +79,20 @@ func main() {
 	go processor.Start()
 
 	fmt.Printf("Running for %d cycles\n", numberOfInstructions)
-	for i := uint64(0); i < uint64(numberOfInstructions)+5; i++ {
+	for i := uint64(0); i < numberOfInstructions+5; i++ {
 		//fmt.Scanln()
 		clock <- i
 		//time.Sleep(1 * time.Millisecond)
-		if i%2000 == 0 {
+		if i%STEP == 0 {
 			saveState(processor)
-			memory.SaveImage(mainMemory, "result.png")
+			memory.SaveImage(mainMemory, OUTFILE)
+			fmt.Printf("Progress: %d \n", (i * 100 / numberOfInstructions))
 		}
 
 	}
 	endJSON()
 	//Save image
-	memory.SaveImage(mainMemory, "result.png")
+	memory.SaveImage(mainMemory, OUTFILE)
+	fmt.Println("Progress: 100\nFinish!")
 
 }

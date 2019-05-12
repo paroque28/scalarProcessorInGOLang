@@ -22,7 +22,7 @@ func check(e error) {
 		panic(e)
 	}
 }
-func addInstruction(mem []byte, ins string, i *int) {
+func addInstruction(mem []byte, ins string, i *uint64) {
 	mem[(*i)*4], mem[(*i)*4+1], mem[(*i)*4+2], mem[(*i)*4+3] = instructionToBytes(ins)
 	*i++
 	for j := 0; j < 3; j++ {
@@ -32,12 +32,12 @@ func addInstruction(mem []byte, ins string, i *int) {
 }
 
 // Instruction memory
-func InitializeInstructionMemory(mem []byte) int {
+func InitializeInstructionMemory(mem []byte) uint64 {
 	fileHandle, err := os.Open("./program.asm")
 	defer fileHandle.Close()
 	fileScanner := bufio.NewScanner(fileHandle)
 	check(err)
-	i := 0
+	i := uint64(0)
 	for fileScanner.Scan() {
 		instruction := fileScanner.Text()
 		if !re.MatchString(instruction) {

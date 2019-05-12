@@ -1,5 +1,7 @@
 package cpu
 
+import "fmt"
+
 type Memory struct {
 	InExecuteControlSignals ExecuteControlSignals `json:"in_execute_control_signals"`
 	OutControlSignals       MemControlSignals     `json:"control_signals"`
@@ -33,8 +35,11 @@ func (mem *Memory) Run(done chan string, mainMemory []byte) {
 		for i := uint64(0); i < BITS64_BYTES; i++ {
 			dataIn := byte(mem.InALUResult >> (8 * i))
 			baseAddress := mem.InExecuteControlSignals.MemWriteAddress
-			//fmt.Printf("[Mem] STORE: original byte[%x]: % x\n", baseAddress+i, mainMemory[baseAddress+i])
-			//fmt.Printf("[Mem] STORE: new      byte[%x]: % x\n", baseAddress+i, dataIn)
+			if DEBUG > 3 {
+				fmt.Printf("[Mem] STORE: original byte[%x]: % x\n", baseAddress+i, mainMemory[baseAddress+i])
+				fmt.Printf("[Mem] STORE: new      byte[%x]: % x\n", baseAddress+i, dataIn)
+			}
+
 			mainMemory[baseAddress+i] = dataIn
 		}
 	}

@@ -1,5 +1,7 @@
 package cpu
 
+import "fmt"
+
 type Execute struct {
 	InDecodeControlSignals DecodeControlSignals  `json:"in_control_signals"`
 	InRd1                  uint64                `json:"in_rd_1"`
@@ -23,9 +25,12 @@ func (exec *Execute) Run(done chan string) {
 	} else {
 		exec.ALUResult = ALU(exec.InDecodeControlSignals.ALUControl, exec.InRd1, uint64(exec.InImmediate))
 	}
-	//if exec.InDecodeControlSignals.ALUControl != 0 {
-	//	fmt.Printf("[Exec] Rd1: %x Op:%x Rd2: %x, Imm:%x, ALUResult = %x\n", exec.InRd1, exec.InDecodeControlSignals.ALUControl, exec.InRd2, exec.InImmediate, exec.ALUResult)
-	//}
+
+	if DEBUG > 3 {
+		if exec.InDecodeControlSignals.ALUControl != 0 {
+			fmt.Printf("[Exec] Rd1: %x Op:%x Rd2: %x, Imm:%x, ALUResult = %x\n", exec.InRd1, exec.InDecodeControlSignals.ALUControl, exec.InRd2, exec.InImmediate, exec.ALUResult)
+		}
+	}
 	exec.setControlSignals(exec.InDecodeControlSignals.MemWriteEnable,
 		exec.InDecodeControlSignals.MemToReg,
 		exec.InDecodeControlSignals.RegisterWriteEnable,
