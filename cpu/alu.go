@@ -114,20 +114,29 @@ func unshuffle(a uint64, b uint64) (result uint64) {
 */
 func shuffle8Lanes(a uint64, b uint64) (result uint64) {
 	result = 0
-	for j := uint(0); j < 64/8; j++ {
+	done := make(chan uint)
+	var steps [8]uint8
+	for j := uint(0); j < 8; j++ {
 		miniA := uint8(a >> (8 * j))
-		step := uint8(0)
-		for i := uint(0); i < 4; i++ {
-			leftBit := (miniA >> (7 - i)) & 0x1
-			rightBit := (miniA >> (3 - i)) & 0x1
-			twoBits := rightBit | (leftBit << 1)
-			step |= (twoBits) << (i * 2)
-		}
-		result |= uint64(step) << (8 * j)
+		go shuffleLane(miniA, &(steps[j]), done, j)
+	}
+	for i := 0; i < 8; i++ {
+		j := <-done
+		result |= uint64(steps[j]) << (8 * j)
 	}
 
 	//fmt.Printf("[ALU] SHUFFLE255:  a:%x result:%x\n", a, result)
 	return result
+}
+func shuffleLane(miniA uint8, step *uint8, done chan uint, j uint) {
+	for i := uint(0); i < 4; i++ {
+		leftBit := (miniA >> (7 - i)) & 0x1
+		rightBit := (miniA >> (3 - i)) & 0x1
+		twoBits := rightBit | (leftBit << 1)
+		*step |= (twoBits) << (i * 2)
+
+	}
+	done <- j
 }
 
 /*
@@ -136,21 +145,28 @@ func shuffle8Lanes(a uint64, b uint64) (result uint64) {
 func unshuffle8Lanes(a uint64, b uint64) (result uint64) {
 
 	result = 0
+	done := make(chan uint)
+	var steps [8]uint8
 	for j := uint(0); j < 64/8; j++ {
 		miniA := uint8(a >> (8 * j))
-		step := uint8(0)
-		for i := uint(0); i < 4; i++ {
-			twoBits := (miniA >> (2 * i)) & 0x3
-			leftBit := twoBits >> 1
-			rightBit := twoBits & 0x1
-			step |= (leftBit << (7 - i)) | (rightBit << (3 - i))
-		}
-		result |= uint64(step) << (8 * j)
+		go unshuffleLane(miniA, &(steps[j]), done, j)
+	}
+	for i := 0; i < 8; i++ {
+		j := <-done
+		result |= uint64(steps[j]) << (8 * j)
 	}
 	//fmt.Printf("[ALU] UNSHUFFLE255:  a:%x result:%x\n", a, result)
 	return result
 }
-
+func unshuffleLane(miniA uint8, step *uint8, done chan uint, j uint) {
+	for i := uint(0); i < 4; i++ {
+		twoBits := (miniA >> (2 * i)) & 0x3
+		leftBit := twoBits >> 1
+		rightBit := twoBits & 0x1
+		*step |= (leftBit << (7 - i)) | (rightBit << (3 - i))
+	}
+	done <- j
+}
 func rotateLeft(a uint64, b uint64) (result uint64) {
 	result = (a << b) | (a >> (64 - b))
 	//fmt.Printf("[ALU] RL:  a:%x b:%x result:%x\n", a, b, result)

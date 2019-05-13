@@ -93,6 +93,6 @@ func main() {
 	endJSON()
 	//Save image
 	memory.SaveImage(mainMemory, OUTFILE)
-	fmt.Println("Progress: 100\nFinish!")
+	fmt.Printf("Progress: 100\nEstimated time at 1Ghz: %d microseconds\nTotal cycles: %d\n", numberOfInstructions/1000, numberOfInstructions)
 
 }
